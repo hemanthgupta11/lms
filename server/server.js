@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Gupta@123',
+  password: '',
   database: 'lms',
 });
 
@@ -182,6 +182,67 @@ app.get('/books', (req, res) => {
     return res.status(200).json(results);
   });
 });
+
+// Handle GET request to retrieve the combined list with Books,Author, Genre.
+app.get('/books-list', (req, res) => {
+  const { sortby, ascending } = req.query;
+
+  // Validate the sorting column and sorting order
+  const validSortColumns = ['BookID', 'Title', 'AuthorName', 'Year', 'Publisher', 'GenreID', 'ISBN', 'Status'];
+  const validSortingOrders = ['asc', 'desc'];
+
+  if (!validSortColumns.includes(sortby) || !validSortingOrders.includes(ascending)) {
+    return res.status(400).json({ error: 'Invalid sorting column or order' });
+  }
+
+  // Build the SQL query with dynamic sorting and order
+  const sql = `SELECT b.BookID, b.Title, a.AuthorName, b.Year, b.Publisher, b.GenreID, b.ISBN, b.Status
+               FROM Book b
+               INNER JOIN Author a ON b.AuthorID = a.AuthorID
+               ORDER BY ${sortby} ${ascending}`; // Use the provided sorting column and order
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error fetching book list' });
+    }
+
+    return res.status(200).json(results);
+  });
+});
+
+// Handle GET request to retrieve the combined reserved book list with Books,Author, Genre.
+app.get('/reserved-books', (req, res) => {
+  const { sortby, ascending, search, userID } = req.query;
+
+  // Validate the sorting column and sorting order
+  const validSortColumns = ['BookID', 'Title', 'AuthorName', 'Year', 'Publisher', 'GenreID', 'ISBN', 'Status'];
+  const validSortingOrders = ['asc', 'desc'];
+
+  if (!validSortColumns.includes(sortby) || !validSortingOrders.includes(ascending)) {
+    return res.status(400).json({ error: 'Invalid sorting column or order' });
+  }
+
+  // Build the SQL query with dynamic sorting, order, and search
+  const sql = `SELECT b.BookID, b.Title, a.AuthorName, b.Year, b.Publisher, b.GenreID, b.ISBN, b.Status
+               FROM ReservedBook rb
+               INNER JOIN Book b ON rb.BookID = b.BookID
+               INNER JOIN Author a ON b.AuthorID = a.AuthorID
+               WHERE rb.UserID = ? 
+               ORDER BY ${sortby} ${ascending}`; // Use the provided sorting column, order, and filter by UserID
+
+  db.query(sql, [userID], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error fetching reserved books' });
+    }
+
+    return res.status(200).json(results);
+  });
+});
+
+
+
 
 
 // Handle DELETE request to delete a book by BookID

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './UserDashboard.css';
+import BooksList from '../BooksList/BooksList';
 
 const UserDashboard = () => {
   const [borrowingHistory, setBorrowingHistory] = useState([]);
@@ -52,37 +53,42 @@ const UserDashboard = () => {
 
       <main>
         <section>
-            <h2>Your Borrowing History</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Book Title</th>
-                    <th>Author</th>
-                    <th>Borrowed On</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
+          <h2>Your Borrowing History</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Book Title</th>
+                <th>Author</th>
+                <th>Borrowed On</th>
+                <th>Due Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {borrowingHistory.map((record) => (
+                <tr key={record.id}>
+                  <td>{record.bookTitle}</td>
+                  <td>{record.author}</td>
+                  <td>{record.borrowedOn}</td>
+                  <td>{record.dueDate}</td>
+                  <td>{record.status}</td>
                 </tr>
-                </thead>
-                <tbody>
-                {borrowingHistory.map((record) => (
-                    <tr key={record.id}>
-                    <td>{record.bookTitle}</td>
-                    <td>{record.author}</td>
-                    <td>{record.borrowedOn}</td>
-                    <td>{record.dueDate}</td>
-                    <td>{record.status}</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
         </section>
         <section>
-            <h2>Your Reserved Books</h2>
-            <ul>
-                {reservedBooks.map((book) => (
-                <li key={book.id}>{book.title}</li>
-                ))}
-            </ul>
+          <h2>Your Reserved Books</h2>
+          <ul>
+            {reservedBooks.map((book) => (
+              <li key={book.id}>{book.title}</li>
+            ))}
+          </ul>
+          <BooksList role="user" tableContext="reserved-books" userID='1' />
+        </section>
+        <section>
+          <h2>Books</h2>
+          <BooksList role="user" tableContext="all-books" />
         </section>
       </main>
     </div>
