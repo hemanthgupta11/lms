@@ -1,45 +1,54 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState(''); // Changed to 'username'
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Here, you can implement your login logic, such as sending a request to an authentication server.
-    // For simplicity, we'll just log the entered email and password.
     try {
       const response = await axios.post('http://localhost:3001/login', {
-        username: email,
+        username: username, // Use 'username' field
         password: password,
       });
 
       if (response.status === 200) {
         // Successful login
-        alert(response.data.message); // Display the success message
+        alert(response.data.message);if (response.data.userType === 'Admin') {
+        // Redirect to the admin dashboard
+        navigate('/admin-dashboard');
       } else {
+        // Redirect to the user dashboard
+        navigate('/user-dashboard');
+      }
+    } else {
+        // Handle login failure
+        alert('Login failed');
+        setUsername("");
+        setPassword("");
       }
     } catch (error) {
-      console.error(error);
+      alert('Login failed');
+      setUsername("");
+      setPassword("");
     }
-    console.log('Email:', email);
-    console.log('Password:', password);
   };
 
   return (
     <div className="login-page">
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
-        <label>Email:</label>
+        <label>Username:</label>
         <input
           type="text"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter your username"
         />
         <label>Password:</label>
         <input
@@ -49,7 +58,6 @@ const LoginPage = () => {
           placeholder="Enter your password"
         />
         <button type="submit">Login</button>
-        {/* Add a signup link that navigates to the SignUp page */}
         <p>
           Don't have an account? <Link to="/signup">Sign up</Link>
         </p>

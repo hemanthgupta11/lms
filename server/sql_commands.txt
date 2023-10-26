@@ -1,0 +1,100 @@
+-- Create the User table
+CREATE TABLE User (
+    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Address VARCHAR(255),
+    ContactInfo VARCHAR(255),
+    Username VARCHAR(50) UNIQUE NOT NULL,
+    Password VARCHAR(255) NOT NULL,
+    UserType ENUM('User', 'Admin') NOT NULL,
+    RegistrationDate DATE,
+    CONSTRAINT CHK_User_UserType CHECK (UserType IN ('User', 'Admin'))
+);
+
+-- Create the Author table
+CREATE TABLE Author (
+    AuthorID INT AUTO_INCREMENT PRIMARY KEY,
+    AuthorName VARCHAR(255) NOT NULL
+);
+
+-- Create the Genre table
+CREATE TABLE Genre (
+    GenreID INT AUTO_INCREMENT PRIMARY KEY,
+    GenreName VARCHAR(255) NOT NULL
+);
+
+-- Create the Book table
+CREATE TABLE Book (
+    BookID INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(255) NOT NULL,
+    ISBN VARCHAR(20),
+    Year INT,
+    Publisher VARCHAR(255),
+    Status ENUM('Available', 'Checked Out') NOT NULL,
+    AuthorID INT,
+    GenreID INT,
+    CONSTRAINT FK_Book_Author FOREIGN KEY (AuthorID) REFERENCES Author (AuthorID),
+    CONSTRAINT FK_Book_Genre FOREIGN KEY (GenreID) REFERENCES Genre (GenreID)
+);
+
+-- Create the Transaction table
+CREATE TABLE Transaction (
+    TransactionID INT AUTO_INCREMENT PRIMARY KEY,
+    BorrowDate DATE,
+    DueDate DATE,
+    ReturnDate DATE,
+    FineAmount DECIMAL(10, 2),
+    Status ENUM('Borrowed', 'Returned') NOT NULL,
+    BookID INT,
+    UserID INT,
+    CONSTRAINT FK_Transaction_Book FOREIGN KEY (BookID) REFERENCES Book (BookID),
+    CONSTRAINT FK_Transaction_User FOREIGN KEY (UserID) REFERENCES User (UserID)
+);
+
+-- Create the Fine table
+CREATE TABLE Fine (
+    FineID INT AUTO_INCREMENT PRIMARY KEY,
+    TransactionID INT,
+    Amount DECIMAL(10, 2) NOT NULL,
+    PaymentDate DATE,
+    Status ENUM('Paid', 'Unpaid') NOT NULL,
+    CONSTRAINT FK_Fine_Transaction FOREIGN KEY (TransactionID) REFERENCES Transaction (TransactionID)
+);
+
+-- Create the Reservation table
+CREATE TABLE Reservation (
+    ReservationID INT AUTO_INCREMENT PRIMARY KEY,
+    TransactionID INT,
+    ReservationDate DATE,
+    ExpiryDate DATE,
+    Status ENUM('Active', 'Expired') NOT NULL,
+    CONSTRAINT FK_Reservation_Transaction FOREIGN KEY (TransactionID) REFERENCES Transaction (TransactionID)
+);
+
+-- Create the Renewal table
+CREATE TABLE Renewal (
+    RenewalID INT AUTO_INCREMENT PRIMARY KEY,
+    TransactionID INT,
+    RenewalDate DATE,
+    NewDueDate DATE,
+    Status ENUM('Approved', 'Denied') NOT NULL,
+    CONSTRAINT FK_Renewal_Transaction FOREIGN KEY (TransactionID) REFERENCES Transaction (TransactionID)
+);
+
+-- Create the OverdueItem table
+CREATE TABLE OverdueItem (
+    OverdueID INT AUTO_INCREMENT PRIMARY KEY,
+    TransactionID INT,
+    OverdueStatus ENUM('True', 'False') NOT NULL,
+    OverdueDays INT,
+    CONSTRAINT FK_OverdueItem_Transaction FOREIGN KEY (TransactionID) REFERENCES Transaction (TransactionID)
+);
+
+-- Create the Return table
+CREATE TABLE Return (
+    ReturnID INT AUTO_INCREMENT PRIMARY KEY,
+    TransactionID INT,
+    ReturnDate DATE,
+    LateReturnStatus ENUM('True', 'False') NOT NULL,
+    CONSTRAINT FK_Return_Transaction FOREIGN KEY (TransactionID) REFERENCES Transaction (TransactionID)
+);

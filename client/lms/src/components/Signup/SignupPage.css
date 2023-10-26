@@ -50,3 +50,33 @@
   p {
     margin-top: 10px;
   }
+
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* Style for the options within the select element */
+  option {
+    background-color: #fff; /* Background color for unselected options */
+    color: #333; /* Text color for unselected options */
+  }
+  
+  select:hover {
+    border-color: #007bff; /* Border color on hover */
+  }
+  
+  /* Style for the selected option */
+  select:focus {
+    border-color: #007bff; /* Border color when the dropdown is focused */
+    outline: none; /* Remove the default outline */
+  }
+  
+  /* Style for selected option */
+  option:checked {
+    background-color: #007bff; /* Background color for the selected option */
+    color: #fff; /* Text color for the selected option */
+  }
