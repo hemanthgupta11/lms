@@ -1,106 +1,54 @@
 /* UserDashboard.css */
-
-/* General styles */
 .user-dashboard {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f8f8f8;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-  }
-  
-  header {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  h1 {
-    font-size: 30px;
-    color: #333;
-  }
-  
-  p {
-    font-size: 18px;
-    color: #777;
-    margin-top: 10px;
-  }
-  
-  nav ul {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-  }
-  
-  nav li a {
-    text-decoration: none;
-    font-size: 18px;
-    color: #007bff;
-    font-weight: bold;
-  }
-  
-  main {
-    margin-top: 30px;
-  }
-  
-  /* Borrowing History styles */
-  section {
-    margin-bottom: 30px;
-  }
-  
-  h2 {
-    font-size: 24px;
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  table th, table td {
-    border: 1px solid #e0e0e0;
-    padding: 15px;
-    text-align: left;
-  }
-  
-  table th {
-    background-color: #f8f8f8;
-    font-weight: bold;
-  }
-  
-  table tr:hover {
-    background-color: #f2f2f2;
-  }
-  
-  /* Reserved Books styles */
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  ul li {
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
-  /* Responsive styles (for smaller screens) */
-  @media (max-width: 768px) {
-    nav ul {
-      flex-direction: column;
-    }
-  
-    nav li a {
-      display: block;
-      margin-bottom: 10px;
-    }
-  }
-  
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 30px;
+  color: #333;
+}
+
+p {
+  font-size: 18px;
+  color: #777;
+  margin-top: 10px;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+nav li a {
+  text-decoration: none;
+  font-size: 18px;
+  color: #007bff;
+  font-weight: bold;
+}
+
+main {
+  margin-top: 30px;
+}
+
+section {
+  margin-bottom: 30px;
+}
+
+h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}

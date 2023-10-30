@@ -248,6 +248,7 @@ app.get('/reserved-books', (req, res) => {
 // Handle DELETE request to delete a book by BookID
 app.delete('/books/:bookId', (req, res) => {
   const bookId = req.params.bookId;
+  const { sortby, ascending } = req.query;
 
   // Delete the book from the database
   const sql = 'DELETE FROM Book WHERE BookID = ?';
@@ -263,6 +264,70 @@ app.delete('/books/:bookId', (req, res) => {
 });
 
 
+// Handle POST request to add a new transaction
+app.post('/borrow', (req, res) => {
+  const { bookId, userID, borrowDate, dueDate, fineAmount } = req.body;
+
+  // Insert a new transaction into the Transaction table
+  const insertTransactionQuery = `
+    INSERT INTO Transaction (BookID, UserID, BorrowDate, DueDate, FineAmount, Status)
+    VALUES (?, ?, ?, ?, ?, 'Borrowed')
+  `;
+
+  const transactionValues = [bookId, userID, borrowDate, dueDate, fineAmount];
+
+  db.query(insertTransactionQuery, transactionValues, (transactionInsertErr) => {
+    if (transactionInsertErr) {
+      console.error(transactionInsertErr);
+      return res.status(500).json({ message: 'Error adding transaction' });
+    }
+
+    // Update the status of the book to 'Checked Out' in the Book table
+    const updateBookStatusQuery = 'UPDATE Book SET Status = ? WHERE BookID = ?';
+    const updateBookStatusValues = ['Checked Out', bookId];
+
+    db.query(updateBookStatusQuery, updateBookStatusValues, (updateBookStatusErr) => {
+      if (updateBookStatusErr) {
+        console.error(updateBookStatusErr);
+        return res.status(500).json({ message: 'Error updating book status' });
+      }
+
+      return res.status(201).json({ message: 'Book borrowed successfully' });
+    });
+  });
+});
+
+// Handle GET request to retrieve all borrowed books for a specific user
+app.get('/borrowed-books', (req, res) => {
+  const userID = req.query.userID;
+  const { sortby, ascending } = req.query;
+
+  // Define the SQL query for sorting based on the provided parameters
+  let sql = `
+    SELECT b.BookID, b.Title, a.AuthorName, b.Year, b.Publisher, b.GenreID, b.ISBN, t.BorrowDate, t.DueDate, t.FineAmount
+    FROM Transaction t
+    INNER JOIN Book b ON t.BookID = b.BookID
+    INNER JOIN Author a ON b.AuthorID = a.AuthorID
+    WHERE t.UserID = ?
+  `;
+
+  // Check for sorting parameters and adjust the SQL query accordingly
+  if (sortby && (sortby === 'BookID' || sortby === 'Title' || sortby === 'BorrowDate' || sortby === 'DueDate')) {
+    sql += ` ORDER BY ${sortby} ${ascending === 'asc' ? 'ASC' : 'DESC'}`;
+  } else {
+    // Default sorting if invalid or no sorting parameter is provided
+    sql += ' ORDER BY BorrowDate ASC';
+  }
+
+  db.query(sql, [userID], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error fetching borrowed books' });
+    }
+
+    return res.status(200).json(results);
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
