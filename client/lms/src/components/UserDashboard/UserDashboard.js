@@ -25,32 +25,22 @@ const UserDashboard = () => {
         <h1>Welcome to Your User Dashboard</h1>
         <p>Explore your user-specific features below:</p>
       </header>
-
-      <nav>
-        <ul>
-          <li><a href="/search-books">Search for Books</a></li>
-          <li><a href="/borrowing-history">View Borrowing History</a></li>
-          <li><a href="/reserve-books">Reserve Books</a></li>
-          <li><a href="/pay-fines">Pay Fines</a></li>
-        </ul>
-      </nav>
-
       <main>
         <section>
           <h2>Your Borrowing History</h2>
           <BooksList role="user" tableContext="borrowed-books" userID='1' />
         </section>
         <section>
-          <h2>Your Reserved Books</h2>
+          {/* <h2>Your Reserved Books</h2>
           <ul>
             {reservedBooks.map((book) => (
               <li key={book.id}>{book.title}</li>
             ))}
           </ul>
-          <BooksList role="user" tableContext="reserved-books" userID='1' />
+          <BooksList role="user" tableContext="reserved-books" userID='1' /> */}
         </section>
         <section>
-          <h2>Books</h2>
+          <h2>All Books</h2>
           <BooksList role="user" tableContext="all-books" userID='1'  />
         </section>
       </main>

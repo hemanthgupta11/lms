@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './BooksList.css';
+import axios from 'axios';
 
 function BooksList({ role, tableContext, userID }) {
+  // State and variables
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [books, setBooks] = useState([]);
@@ -10,6 +12,7 @@ function BooksList({ role, tableContext, userID }) {
   const [searchQuery, setSearchQuery] = useState('');
   userID = parseInt(userID);
 
+  // Define columns for different contexts
   const allBooksColumns = [
     { key: 'BookID', label: 'Book ID' },
     { key: 'Title', label: 'Title' },
@@ -25,70 +28,102 @@ function BooksList({ role, tableContext, userID }) {
     { key: 'BookID', label: 'Book ID' },
     { key: 'Title', label: 'Title' },
     { key: 'AuthorName', label: 'Author Name' },
-    // { key: 'Year', label: 'Year' },
-    // { key: 'Publisher', label: 'Publisher' },
-    // { key: 'GenreID', label: 'Genre ID' },
+    { key: 'ISBN', label: 'ISBN' },
+    { key: 'BorrowDate', label: 'Borrow Date' },
+    { key: 'DueDate', label: 'Due Date' },
+    { key: 'FineAmount', label: 'Fine Amount' }
+  ];
+
+  const availableBooksColumns = [
+    { key: 'BookID', label: 'Book ID' },
+    { key: 'Title', label: 'Title' },
+    { key: 'AuthorName', label: 'Author Name' },
+    { key: 'Year', label: 'Year' },
+    { key: 'Publisher', label: 'Publisher' },
+    { key: 'GenreID', label: 'Genre ID' },
+    { key: 'ISBN', label: 'ISBN' },
+    { key: 'Status', label: 'Status' },
+  ];
+
+  const overdueBooksColumns = [
+    { key: 'BookID', label: 'Book ID' },
+    { key: 'Title', label: 'Title' },
+    { key: 'AuthorName', label: 'Author Name' },
     { key: 'ISBN', label: 'ISBN' },
     { key: 'BorrowDate', label: 'Borrow Date' },
     { key: 'DueDate', label: 'Due Date' },
     { key: 'FineAmount', label: 'Fine Amount' },
+    { key: 'ReturnDate', label: 'Return Date' },
   ];
 
   // Define columns based on the tableContext
-  const columns = tableContext === 'borrowed-books' ? borrowedBooksColumns : allBooksColumns;
+  const columns =
+    tableContext === 'borrowed-books'
+      ? borrowedBooksColumns
+      : tableContext === 'overdue'
+      ? overdueBooksColumns
+      : tableContext === 'available'
+      ? availableBooksColumns
+      : allBooksColumns;
 
+  // Fetch books when component mounts or when dependencies change
   useEffect(() => {
     fetchBooks();
   }, [sortBy, searchQuery, userID, tableContext]);
 
-  // ...
+  // Function to fetch books
+  const fetchBooks = () => {
+    setBooks([]);
+    const { column, sortOrder } = sortBy;
+    let apiUrl = `http://localhost:3001/books-list?sortby=${column}&ascending=${sortOrder}&search=${searchQuery}`;
 
-const fetchBooks = () => {
-  const { column, sortOrder } = sortBy;
-  let apiUrl = `http://localhost:3001/books-list?sortby=${column}&ascending=${sortOrder}&search=${searchQuery}`;
+    if (tableContext === 'reserved-books') {
+      apiUrl = `http://localhost:3001/reserved-books?sortby=${column}&ascending=${sortOrder}&userID=${userID}&search=${searchQuery}`;
+    } else if (tableContext === 'borrowed-books') {
+      apiUrl = `http://localhost:3001/borrowed-books?sortby=${column}&ascending=${sortOrder}&userID=${userID}`;
+    } else if (tableContext === 'overdue') {
+      apiUrl = `http://localhost:3001/overdue-books?sortby=${column}&ascending=${sortOrder}`;
+    } else if (tableContext === 'available') {
+      apiUrl = `http://localhost:3001/available-books?sortby=${column}&ascending=${sortOrder}`;
+    }
 
-  if (tableContext === 'reserved-books') {
-    apiUrl = `http://localhost:3001/reserved-books?sortby=${column}&ascending=${sortOrder}&userID=${userID}&search=${searchQuery}`;
-  } else if (tableContext === 'borrowed-books') {
-    apiUrl = `http://localhost:3001/borrowed-books?sortby=${column}&ascending=${sortOrder}&userID=${userID}`;
-  }
+    fetch(apiUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          // Modify date formats
+          const modifiedData = data.map((book) => ({
+            ...book,
+            BorrowDate: formatToMMDDYYYY(book.BorrowDate),
+            DueDate: formatToMMDDYYYY(book.DueDate),
+            ReturnDate: formatToMMDDYYYY(book.ReturnDate),
+          }));
 
-  fetch(apiUrl)
-    .then((response) => response.json())
-    .then((data) => {
-      if (Array.isArray(data)) {
+          setBooks(modifiedData);
+          setLoading(false);
+        } else {
+          console.error('Invalid data format:', data);
+          setBooks([]);
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
         setBooks([]);
-        // Modify borrowed date and due date format
-        const modifiedData = data.map((book) => ({
-          ...book,
-          BorrowDate: formatToMMDDYYYY(book.BorrowDate),
-          DueDate: formatToMMDDYYYY(book.DueDate),
-        }));
-        
-        setBooks(modifiedData);
         setLoading(false);
-      } else {
-        console.error('Invalid data format:', data);
-        setBooks([]);
-        setLoading(false);
-      }
-    })
-    .catch((error) => {
-      console.error('Error fetching data:', error);
-      setBooks([]);
-      setLoading(false);
-    });
-};
+      });
+  };
 
-// Function to format a date to "mm-dd-yyyy" format
-const formatToMMDDYYYY = (dateStr) => {
-  const date = new Date(dateStr);
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  const yyyy = date.getFullYear();
-  return `${mm}-${dd}-${yyyy}`;
-};
+  // Function to format a date to "mm-dd-yyyy" format
+  const formatToMMDDYYYY = (dateStr) => {
+    const date = new Date(dateStr);
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${mm}-${dd}-${yyyy}`;
+  };
 
+  // Handle sorting change
   const handleSortChange = (column) => {
     if (column === sortBy.column) {
       const newSortOrder = sortBy.sortOrder === 'asc' ? 'desc' : 'asc';
@@ -97,13 +132,27 @@ const formatToMMDDYYYY = (dateStr) => {
       setSortBy({ column, sortOrder: 'asc' });
     }
   };
-
   const renderSortIndicator = (column) => {
     if (column === sortBy.column) {
       return sortBy.sortOrder === 'asc' ? '↑' : '↓';
     } else {
       return '';
     }
+  };
+
+  const deleteBook = (book) => {
+    // Make a DELETE request to delete the book
+    axios.delete(`http://localhost:3001/books/${book.BookID}`)
+      .then((response) => {
+        // Handle success (e.g., display a success message)
+        alert('Book deleted successfully:', response.data);
+        window.location.reload();
+        // Update the state or re-fetch the book list
+      })
+      .catch((error) => {
+        // Handle errors (e.g., display an error message)
+        alert('Error deleting book:', error);
+      });
   };
 
   const renderActions = (book) => {
@@ -113,14 +162,14 @@ const formatToMMDDYYYY = (dateStr) => {
           <button className="action-button green-button" onClick={() => handleBorrow(book)}>
             Borrow
           </button>
-          <button className="action-button red-button">Reserve</button>
+          {/* <button className="action-button red-button">Reserve</button> */}
         </div>
       );
     } else if (role === 'admin' && tableContext === 'all-books') {
       return (
         <div>
-          <button className="action-button green-button">Edit</button>
-          <button className="action-button red-button">Delete</button>
+          {/* <button className="action-button green-button">Edit</button>
+          <button className="action-button red-button" onClick={() => deleteBook(book)} >Delete</button> */}
         </div>
       );
     } else if (role === 'user' && tableContext === 'reserved-books') {
@@ -204,16 +253,16 @@ const formatToMMDDYYYY = (dateStr) => {
 
   return (
     <div className="BooksList">
-      <h1>{tableContext === 'borrowed-books' ? 'Borrowed Books' : 'Library Book Search'}</h1>
-      {tableContext !== 'borrowed-books' && (
-        <input
-          type="text"
-          placeholder="Search books..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="search-input"
-        />
-      )}
+      <h1>
+        {tableContext === 'borrowed-books'
+          ? 'Borrowed Books'
+          : tableContext === 'overdue'
+          ? 'Overdue Books'
+          : tableContext === 'available'
+          ? 'Available Books'
+          : 'Library Books'}
+      </h1>
+      {/* ... (Existing code for search input and rendering table) */}
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -225,7 +274,7 @@ const formatToMMDDYYYY = (dateStr) => {
                   {col.label} {renderSortIndicator(col.key)}
                 </th>
               ))}
-              {<th>Actions</th>}
+              { role === 'user' && (tableContext === 'all-books' || tableContext === 'borrowed-books')? <th>Actions</th>:''}
             </tr>
           </thead>
           <tbody>
@@ -236,7 +285,7 @@ const formatToMMDDYYYY = (dateStr) => {
                     {col.key === 'Status' ? getStatusIconWithColor(book.Status) : book[col.key]}
                   </td>
                 ))}
-                {<td>{renderActions(book)}</td>}
+                {role === 'user' && (tableContext === 'all-books' || tableContext === 'borrowed-books') ? <td>{renderActions(book)}</td>: ''}
               </tr>
             ))}
           </tbody>

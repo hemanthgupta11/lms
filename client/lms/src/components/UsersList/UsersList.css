@@ -1,0 +1,54 @@
+/* UsersList.css */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+  }
+  
+  th:hover {
+    cursor: pointer;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  tr:hover {
+    background-color: #e0e0e0;
+  }
+  
+  /* Sort indicator */
+  th span {
+    margin-left: 5px;
+  }
+  
+  /* Loading message */
+  .loading-message {
+    text-align: center;
+    margin: 20px;
+  }
+  
+  /* Centered title */
+  h1 {
+    text-align: center;
+    margin: 20px 0;
+  }
+  .delete-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+  }  

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ManageBooks.css'; // Import the CSS file for styling
+import BooksList from '../BooksList/BooksList';
 
 const ManageBooks = () => {
     const [books, setBooks] = useState([]);
@@ -52,21 +53,6 @@ const ManageBooks = () => {
       });
   };
 
-  const deleteBook = (bookId) => {
-    // Make a DELETE request to delete the book
-    axios.delete(`http://localhost:3001/books/${bookId}`)
-      .then((response) => {
-        // Handle success (e.g., display a success message)
-        alert('Book deleted successfully:', response.data);
-        window.location.reload();
-        // Update the state or re-fetch the book list
-      })
-      .catch((error) => {
-        // Handle errors (e.g., display an error message)
-        alert('Error deleting book:', error);
-      });
-  };
-
   useEffect(() => {
     // Fetch the list of books from the server
     axios.get('http://localhost:3001/books')
@@ -82,6 +68,7 @@ const ManageBooks = () => {
       <header>
         <h1>Manage Books</h1>
         <p>Manage your library's book collection:</p>
+        <BooksList role="admin" tableContext="all-books" ></BooksList>
       </header>
 
       <main>
@@ -141,7 +128,7 @@ const ManageBooks = () => {
         </section>
 
         <section className="book-list-section">
-          <h2>Book List</h2>
+          {/* <h2>Book List</h2>
           <ul className="book-list">
             {books.map((book) => (
               <li key={book.BookID}>
@@ -151,7 +138,7 @@ const ManageBooks = () => {
                 <button className="delete-button" onClick={() => deleteBook(book.BookID)}>Delete</button>
               </li>
             ))}
-          </ul>
+          </ul> */}
         </section>
       </main>
     </div>

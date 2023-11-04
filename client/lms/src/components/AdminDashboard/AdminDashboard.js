@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css'; // Import the CSS file for styling
+import BooksList from '../BooksList/BooksList';
+import Analytics from '../Analytics/Analytics';
 
 const AdminDashboard = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -15,15 +17,6 @@ const AdminDashboard = () => {
       .catch((error) => {
         console.error(error);
       });
-
-    // Fetch analytics data from the server
-    axios.get('http://localhost:3001/admin/analytics')
-      .then((response) => {
-        setAnalyticsData(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
   }, []);
 
   return (
@@ -32,7 +25,6 @@ const AdminDashboard = () => {
         <h1>Welcome to Your Admin Dashboard</h1>
         <p>Manage library operations and view analytics:</p>
       </header>
-
       <nav>
         <ul>
           <li>
@@ -41,25 +33,30 @@ const AdminDashboard = () => {
           <li>
             <a href="/manage-users">Manage Users</a>
           </li>
-          <li>
-            <a href="/view-analytics">View Analytics</a>
-          </li>
         </ul>
       </nav>
 
       <main>
-        <section>
-          <h2>Pending Requests</h2>
-          <ul>
-            {/* List of pending requests */}
-          </ul>
-        </section>
-
-        <section>
+      <section>
           <h2>Analytics Data</h2>
           <div className="analytics-chart">
             {/* Display analytics chart or data */}
-          </div>
+            <Analytics></Analytics>
+            </div>
+        </section>
+        <section>
+          <h2>Overdue Books</h2>
+          <div className="analytics-chart">
+            {/* Display analytics chart or data */}
+            <BooksList role="user" tableContext="overdue" />
+            </div>
+        </section>
+        <section>
+          <h2>Available Books</h2>
+          <div className="analytics-chart">
+            {/* Display analytics chart or data */}
+            <BooksList role="user" tableContext="available" />
+            </div>
         </section>
       </main>
     </div>

@@ -329,6 +329,135 @@ app.get('/borrowed-books', (req, res) => {
   });
 });
 
+// Handle GET request to retrieve the list of users
+app.get('/all-users', (req, res) => {
+  // Query to select all users
+  const sql = 'SELECT * FROM User';
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error fetching user list' });
+    }
+
+    return res.status(200).json(results);
+  });
+});
+
+// Handle DELETE request to delete a user
+app.delete('/delete-user/:userId', (req, res) => {
+  const userId = req.params.userId;
+
+  // SQL query to delete the user
+  const sql = 'DELETE FROM User WHERE UserID = ?';
+
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error deleting user' });
+    }
+
+    return res.status(200).json({ message: 'User deleted successfully' });
+  });
+});
+
+// Handle GET request to retrieve the list of overdue books
+app.get('/overdue-books', (req, res) => {
+  // Extract query parameters for sorting, filtering, and user ID
+  const { sortby, ascending } = req.query;
+
+  // Define the columns you want to select
+  const overdueBooksColumns = [
+    'b.BookID',
+    'b.Title',
+    'a.AuthorName AS AuthorName',
+    'b.ISBN',
+    't.BorrowDate',
+    't.DueDate',
+    't.FineAmount',
+    't.ReturnDate'
+  ];
+
+  // Create a SQL query based on the provided parameters
+  const sql = `
+    SELECT ${overdueBooksColumns.join(', ')}
+    FROM Book AS b
+    INNER JOIN Transaction AS t ON b.BookID = t.BookID
+    INNER JOIN Author AS a ON b.AuthorID = a.AuthorID
+    WHERE t.Status = 'Borrowed'
+    AND t.DueDate < CURDATE()
+    ORDER BY ${sortby} ${ascending === 'asc' ? 'ASC' : 'DESC'}
+  `;
+
+  // Execute the query
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error fetching overdue books' });
+    }
+
+    return res.status(200).json(results);
+  });
+});
+
+// Handle GET request to retrieve the list of available books
+app.get('/available-books', (req, res) => {
+  // Extract query parameters for sorting and filtering
+  const { sortby, ascending } = req.query;
+
+  // Create a SQL query based on the provided parameters
+  const sql = `
+    SELECT *
+    FROM Book
+    WHERE Status = 'Available'
+    ORDER BY ${sortby} ${ascending === 'asc' ? 'ASC' : 'DESC'}
+  `;
+
+  // Execute the query
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error fetching available books' });
+    }
+
+    return res.status(200).json(results);
+  });
+});
+
+// Add a new route for the /borrowed-books-data API
+app.get('/borrowed-books-data', (req, res) => {
+  // Calculate the date 30 days ago from today
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  // Query the database to get the count of books borrowed for each day in the last 30 days
+  const sql = `
+    SELECT
+      DATE(BorrowDate) AS BorrowDate,
+      COUNT(*) AS BooksBorrowed
+    FROM
+      Transaction
+    WHERE
+      DATE(BorrowDate) >= DATE(?)
+    GROUP BY
+      DATE(BorrowDate)
+    ORDER BY
+      DATE(BorrowDate);
+  `;
+
+  db.query(sql, [thirtyDaysAgo], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error fetching borrowed books data' });
+    }
+
+    // Send the retrieved data as JSON
+    return res.status(200).json(results);
+  });
+});
+
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
