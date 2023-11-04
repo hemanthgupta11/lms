@@ -192,9 +192,9 @@ function BooksList({ role, tableContext, userID }) {
     }
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = books.slice(indexOfFirstItem, indexOfLastItem);
+  // const indexOfLastItem = currentPage * itemsPerPage;
+  // const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  // const currentItems = books.slice(indexOfFirstItem, indexOfLastItem);
 
   const getStatusIconWithColor = (status) => {
     if (status === 'Available') {
@@ -207,6 +207,12 @@ function BooksList({ role, tableContext, userID }) {
   };
 
   const handleBorrow = (book) => {
+    const confirmReturn = window.confirm(`Are you sure you want to return the book '${book.Title}'?`);
+
+    if(confirmReturn){
+    if(book.Status == 'Checked Out'){
+      return;
+    }
     const today = new Date();
     const borrowDate = today.toJSON();
     today.setDate(today.getDate() + 15);
@@ -235,21 +241,55 @@ function BooksList({ role, tableContext, userID }) {
       .then((data) => {
         if (data.message === 'Book borrowed successfully') {
           // Handle success, e.g., update UI or show a success message
+          alert(`Book '${book.Title}' has been borrowed successfully.`);
         } else {
           // Handle error, e.g., show an error message
+          alert(`'Error borrowing '${book.Title}'`);
         }
       })
       .catch((error) => {
         console.error('Error borrowing book:', error);
         // Handle error, e.g., show an error message
+        alert(`'Error borrowing '${book.Title}'`);
       });
+    }
   };
 
   const handleReturn = (book) => {
-    // Implement handling book return here
-    // You can send a request to the server to return the book.
-    // After a successful return, you can update the UI or show a success message.
+    // Confirm with the user before returning the book
+    const confirmReturn = window.confirm(`Are you sure you want to return the book '${book.Title}'?`);
+  
+    if (confirmReturn) {
+      // Make a POST request to return the book
+      fetch(`http://localhost:3001/return-book`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bookID: book.BookID, // Send the book ID to identify the book to return
+          userID: userID, // Replace 'yourUserID' with the actual user ID
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Book returned successfully
+            // You can update the UI here or show a success message
+            alert(`Book '${book.Title}' has been returned successfully.`);
+            // You may also refresh the book list or update the book's status
+          } else {
+            // Handle errors or show an error message
+            alert(`Error returning the book: ${data.message}`);
+          }
+        })
+        .catch((error) => {
+          // Handle network errors or show an error message
+          alert(`Error returning the book: ${error.message}`);
+        });
+    }
   };
+  
 
   return (
     <div className="BooksList">
@@ -278,7 +318,7 @@ function BooksList({ role, tableContext, userID }) {
             </tr>
           </thead>
           <tbody>
-            {currentItems.map((book) => (
+            {books.map((book) => (
               <tr key={book.BookID}>
                 {columns.map((col) => (
                   <td key={col.key}>
@@ -291,7 +331,7 @@ function BooksList({ role, tableContext, userID }) {
           </tbody>
         </table>
       )}
-      {books.length > itemsPerPage && (
+      {/* {books.length > itemsPerPage && (
         <ul>
           {Array.from({ length: Math.ceil(books.length / itemsPerPage) }, (_, index) => (
             <li
@@ -303,7 +343,7 @@ function BooksList({ role, tableContext, userID }) {
             </li>
           ))}
         </ul>
-      )}
+      )} */}
     </div>
   );
 }

@@ -24,7 +24,7 @@ const LoginPage = () => {
         navigate('/admin-dashboard');
       } else {
         // Redirect to the user dashboard
-        navigate('/user-dashboard');
+        navigate('/user-dashboard', { state: response.data });
       }
     } else {
         // Handle login failure

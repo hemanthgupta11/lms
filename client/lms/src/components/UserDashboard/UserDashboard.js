@@ -2,8 +2,13 @@ import React, { useEffect, useState } from 'react';
 import './UserDashboard.css';
 import axios from 'axios';
 import BooksList from '../BooksList/BooksList';
+import { useLocation } from 'react-router-dom';
 
 const UserDashboard = () => {
+   // Use the useLocation hook to access the location object
+   const location = useLocation();
+   // Extract the props from the state
+   const propsFromNavigation = location.state;
   const [borrowingHistory, setBorrowingHistory] = useState([]);
   const [reservedBooks, setReservedBooks] = useState([]);
 
@@ -28,7 +33,7 @@ const UserDashboard = () => {
       <main>
         <section>
           <h2>Your Borrowing History</h2>
-          <BooksList role="user" tableContext="borrowed-books" userID='1' />
+          <BooksList role="user" tableContext="borrowed-books" userID= {propsFromNavigation.userId} />
         </section>
         <section>
           {/* <h2>Your Reserved Books</h2>
@@ -41,7 +46,7 @@ const UserDashboard = () => {
         </section>
         <section>
           <h2>All Books</h2>
-          <BooksList role="user" tableContext="all-books" userID='1'  />
+          <BooksList role="user" tableContext="all-books" userID={propsFromNavigation.userId}   />
         </section>
       </main>
     </div>
